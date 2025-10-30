@@ -41,8 +41,8 @@ public class TradeController {
                description = "Retrieves a list of all trades in the system. Returns comprehensive trade information including legs and cashflows.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved all trades",
-                    content = @Content(mediaType = "application/json",
-                                     schema = @Schema(implementation = TradeDTO.class))),
+                     content = @Content(mediaType = "application/json",
+                                        schema = @Schema(implementation = TradeDTO.class))),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public List<TradeDTO> getAllTrades() {
@@ -57,8 +57,8 @@ public class TradeController {
                description = "Retrieves a specific trade by its unique identifier")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Trade found and returned successfully",
-                    content = @Content(mediaType = "application/json",
-                                     schema = @Schema(implementation = TradeDTO.class))),
+                     content = @Content(mediaType = "application/json",
+                                        schema = @Schema(implementation = TradeDTO.class))),
         @ApiResponse(responseCode = "404", description = "Trade not found"),
         @ApiResponse(responseCode = "400", description = "Invalid trade ID format")
     })
@@ -77,8 +77,8 @@ public class TradeController {
                description = "Creates a new trade with the provided details. Automatically generates cashflows and validates business rules.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Trade created successfully",
-                    content = @Content(mediaType = "application/json",
-                                     schema = @Schema(implementation = TradeDTO.class))),
+                     content = @Content(mediaType = "application/json",
+                                        schema = @Schema(implementation = TradeDTO.class))),
         @ApiResponse(responseCode = "400", description = "Invalid trade data or business rule violation"),
         @ApiResponse(responseCode = "500", description = "Internal server error during trade creation")
     })
@@ -86,6 +86,20 @@ public class TradeController {
             @Parameter(description = "Trade details for creation", required = true)
             @Valid @RequestBody TradeDTO tradeDTO) {
         logger.info("Creating new trade: {}", tradeDTO);
+
+        // Validation for Book and Counterparty
+        if (tradeDTO.getBookName() == null || tradeDTO.getBookName().isBlank()
+            || tradeDTO.getCounterpartyName() == null || tradeDTO.getCounterpartyName().isBlank()) {
+            logger.warn("Validation failed: Book and Counterparty are required");
+            return ResponseEntity.badRequest().body("Book and Counterparty are required");
+        }
+
+        // Validation for Trade Date
+        if (tradeDTO.getTradeDate() == null) {
+            logger.warn("Validation failed: Trade date is required");
+            return ResponseEntity.badRequest().body("Trade date is required");
+        }
+        
         try {
             Trade trade = tradeMapper.toEntity(tradeDTO);
             tradeService.populateReferenceDataByName(trade, tradeDTO);
@@ -103,8 +117,8 @@ public class TradeController {
                description = "Updates an existing trade with new information. Subject to business rule validation and user privileges.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Trade updated successfully",
-                    content = @Content(mediaType = "application/json",
-                                     schema = @Schema(implementation = TradeDTO.class))),
+                     content = @Content(mediaType = "application/json",
+                                        schema = @Schema(implementation = TradeDTO.class))),
         @ApiResponse(responseCode = "404", description = "Trade not found"),
         @ApiResponse(responseCode = "400", description = "Invalid trade data or business rule violation"),
         @ApiResponse(responseCode = "403", description = "Insufficient privileges to update trade")
@@ -157,8 +171,8 @@ public class TradeController {
                description = "Terminates an existing trade before its natural maturity date")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Trade terminated successfully",
-                    content = @Content(mediaType = "application/json",
-                                     schema = @Schema(implementation = TradeDTO.class))),
+                     content = @Content(mediaType = "application/json",
+                                        schema = @Schema(implementation = TradeDTO.class))),
         @ApiResponse(responseCode = "404", description = "Trade not found"),
         @ApiResponse(responseCode = "400", description = "Trade cannot be terminated in current status"),
         @ApiResponse(responseCode = "403", description = "Insufficient privileges to terminate trade")
@@ -182,8 +196,8 @@ public class TradeController {
                description = "Cancels an existing trade by changing its status to cancelled")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Trade cancelled successfully",
-                    content = @Content(mediaType = "application/json",
-                                     schema = @Schema(implementation = TradeDTO.class))),
+                     content = @Content(mediaType = "application/json",
+                                        schema = @Schema(implementation = TradeDTO.class))),
         @ApiResponse(responseCode = "404", description = "Trade not found"),
         @ApiResponse(responseCode = "400", description = "Trade cannot be cancelled in current status"),
         @ApiResponse(responseCode = "403", description = "Insufficient privileges to cancel trade")
