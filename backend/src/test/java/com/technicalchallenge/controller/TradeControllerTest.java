@@ -183,8 +183,8 @@ public class TradeControllerTest {
         // Given
         Long tradeId = 1001L;
         tradeDTO.setTradeId(tradeId);
-        when(tradeService.saveTrade(any(Trade.class), any(TradeDTO.class))).thenReturn(trade);
-        doNothing().when(tradeService).populateReferenceDataByName(any(Trade.class), any(TradeDTO.class));
+        when(tradeService.amendTrade(anyLong(), any(TradeDTO.class))).thenReturn(trade);
+
 
         // When/Then
         mockMvc.perform(put("/api/trades/{id}", tradeId)
@@ -193,7 +193,7 @@ public class TradeControllerTest {
                 .andExpect(status().isOk());
                 //.andExpect(jsonPath("$.tradeId").value(tradeId));
 
-        verify(tradeService).saveTrade(any(Trade.class), any(TradeDTO.class));
+        verify(tradeService).amendTrade(anyLong(), any(TradeDTO.class));
     }
 
     @Test
