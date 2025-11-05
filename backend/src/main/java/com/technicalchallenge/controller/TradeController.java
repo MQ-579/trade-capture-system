@@ -84,20 +84,20 @@ public class TradeController {
     })
     public ResponseEntity<?> createTrade(
             @Parameter(description = "Trade details for creation", required = true)
-            @Valid @RequestBody TradeDTO tradeDTO) {
+            @RequestBody TradeDTO tradeDTO) {
         logger.info("Creating new trade: {}", tradeDTO);
+
+         // Validation for Trade Date
+        if (tradeDTO.getTradeDate() == null) {
+            logger.warn("Validation failed: Trade date is required");
+            return ResponseEntity.badRequest().body("Trade date is required");
+        }
 
         // Validation for Book and Counterparty
         if (tradeDTO.getBookName() == null || tradeDTO.getBookName().isBlank()
             || tradeDTO.getCounterpartyName() == null || tradeDTO.getCounterpartyName().isBlank()) {
             logger.warn("Validation failed: Book and Counterparty are required");
             return ResponseEntity.badRequest().body("Book and Counterparty are required");
-        }
-
-        // Validation for Trade Date
-        if (tradeDTO.getTradeDate() == null) {
-            logger.warn("Validation failed: Trade date is required");
-            return ResponseEntity.badRequest().body("Trade date is required");
         }
         
         try {
