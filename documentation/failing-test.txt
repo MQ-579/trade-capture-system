@@ -1,0 +1,43 @@
+1. TradeControllerTest debugging:
+1a. fix(test): TradeControllerTest - Fixed testDeleteTrade endpoint validation
+- Problem Description:
+ The test was expecting a response code of 204, which means no content. While the correct response code was 200, which means successfull.
+- Root Cause Analysis: 
+ The test was expecting wrong response code from the endpoint.
+- Solution Implemented: 
+ Replaced the method "isNotContent" with "isOk". 
+- Verification: 
+ I ran the test again and the log file showed that the failure count reduced by 1.
+
+1b. fixed(test): TradeControllerTest - Fixed testCreateTrade endpoint validation
+- Problem Description:
+ The test expected status 400 bad request, but controller returned 200 successfull. The controller did not detect the mismatch and proceeded to call the service normally.
+- Root Cause Analysis:
+ The Controller was overriding (tradeDTO.setTradeId(id)) instead of validating it. Meaning the mismatch check never happens.
+- Solution Implemented:
+ Added explicit check to return 400 Bad Request if path ID differs from request body ID. Thus validate that the path ID matches the DTO ID and reject the request.
+- Verification: 
+ I ran mvn -Dtest=TradeControllerTest test, the test passed and the log file showed that the failure count reduced by 1.
+
+ 1c. fixed(test): TradeControllerTest - Fixed testUpdateTrade endpoint validation
+- Problem Description:
+ The test expected status 200 isOk, but controller returned 201 created, the correct response code.
+- Root Cause Analysis:
+ The method in TradeContollerTest did not match with the method in TradeController. The test was expecting wrong response code from the endpoint
+- Solution Implemented:
+ Updated the method "isOk" with "isCreated" so it matches the method in TradeController.
+- Verification: 
+ I ran mvn clean test the testUpdateTradeIdMismatch() passed and the log file showed that the failure count reduced by 1.
+
+ 1d. fix(test): TradeControllerTest - Fixed testCreateTradeValidationFailure endpoint
+
+- Problem: The testCreateTradeValidationFailure_MissingBook was failing because the createTrade() endpoint returned a 201 (Created) response instead of the expected 400 (Bad Request) when the bookName field was missing in the trade creation request.
+- Root Cause: The createTrade() method in TradeController did not include validation logic for missing bookName and counterpartyName fields.
+  Although @Valid was used to trigger bean validation, these fields were not annotated with @NotNull or similar constraints in the TradeDTO, allowing the method to proceed with saving the trade and returning a 201 status even when required data was missing.
+- Solution: Added validation inside the createTrade() method to check whether both bookName and counterpartyName are present before proceeding.
+  If either field is missing, the method now returns a 400 Bad Request with the message "Book and Counterparty are required".
+- Verification: I ran mvn clean test the testCreateTradeValidationFailure_MissingBook passed successfully and the log file showed that the failure count reduced by 2.
+  The endpoint now correctly returns HTTP 400 with the expected response message when required fields are missing.
+  All other tests in TradeControllerTest also passed, including testCreateTradeValidationFailure_MissingTradeDate confirming that the fix did not introduce any regressions.
+
+
